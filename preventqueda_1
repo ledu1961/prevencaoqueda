@@ -1,0 +1,41 @@
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+BlynkTimer timer;
+char auth[] = "4zanWMQal2rTQeybWmyHu54gKA5O_o-8"; //Auth code sent via Email
+char ssid[] = "VIVOFIBRA-ACB8"; //Wifi name
+char pass[] = "722390ACB8";  //Wifi Password
+int flag=0;
+void notifyOnFire()
+{
+  int isButtonPressed = analogRead(A0);
+  if (isButtonPressed<500 && flag==0) {
+    Serial.println("Acidente");
+    //Serial.println(isButtonPressed);
+    Blynk.notify("ALERTA: PROVAVEL QUEDA");
+    flag=1;
+    digitalWrite(16, HIGH);
+    delay(500);
+    digitalWrite(16, LOW);
+  }
+  else if (isButtonPressed>100 && flag!=0)
+  {
+    flag=0;
+    digitalWrite(16, LOW);
+    Serial.println(isButtonPressed);
+  }
+}
+void setup()
+{
+Serial.begin(9600);
+Blynk.begin(auth, ssid, pass);
+pinMode(A0,INPUT_PULLUP);
+pinMode(16, OUTPUT);
+digitalWrite(16, LOW);
+timer.setInterval(1000L,notifyOnFire); 
+}
+void loop()
+{
+  Blynk.run();
+  timer.run();
+}
